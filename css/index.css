@@ -1,0 +1,129 @@
+html{
+    height: 100%;
+    background: url("../img/2.jpg") no-repeat center;
+    background-size: 100% 100%;
+}
+/*父级*/
+.css3{
+    width: 600px;
+    height:400px;
+    margin: auto;
+    position: relative;
+    background-size: 100% auto;
+    margin-top: 200px;
+    transform-style: preserve-3d;
+    perspective: 800px;
+}
+/*css3背景*/
+.css3-bg{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("../img/1.jpg") no-repeat center;
+    background-size: 100% 100%;
+    transition: all 0.4s 0s;
+    opacity: 0;
+}
+.css3:hover .css3-bg{
+    opacity: 0.9;
+    -webkit-filter:blur(2px)
+}
+
+/*线条*/
+.css3-content{
+    width: 600px;
+    height: 400px;
+    position: absolute;
+    z-index: 2;
+}
+.css3-content:before , .css3-content:after{
+    content: "";
+    display: block;
+    box-sizing: border-box;
+    position: absolute;
+    width: 600px;
+    height: 400px;
+    top: 0px;
+    left: 0px;
+    transition: clip 0.4s 0s linear;
+}
+.css3-content:before{
+    border-top: solid 3px #fff;
+    border-bottom: solid 3px #fff;
+    clip: rect(0px,300px,400px,300px);
+}
+.css3-content:after{
+    border-left: solid 3px #fff;
+    border-right: solid 3px #fff;
+    clip: rect(225px,600px,200px,0px);
+}
+.css3:hover .css3-content:before{
+    clip: rect(0px,600px,400px,0px);
+}
+.css3:hover .css3-content:after{
+    clip: rect(0px,600px,400px,0px);
+}
+/*文字*/
+.css3-text{
+    margin-top: 140px;
+    text-align: center;
+}
+.css3-content h3{
+    font-size: 60px;
+    background-image:-webkit-linear-gradient(left,#3498db,#f47920 10%,#d71345 20%,#f7acbc 30%,#ffd400 40%,#3498db 50%,#f47920 60%,#d71345 70%,#f7acbc 80%,#ffd400 90%,#3498db);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-background-size: 200% 100%;
+    animation: myColor 4s infinite linear;
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 1s 0s;
+}
+.css3:hover .css3-content h3{
+    opacity: 1;
+    transform: translateY(0px);
+}
+.lookhtml{
+    margin: auto;
+    font-size: 40px;
+    margin-top: 40px;
+    color: #fff;
+    opacity: 0;
+    text-align: center;
+    display: block;
+    position: relative;
+    z-index: 3;
+    transition: opacity 0.4s 0s;
+}
+.css3:hover .lookhtml{
+    opacity: 1;
+}
+
+@keyframes myColor
+{
+    0%  { background-position: 0 0;}
+    100% { background-position: -100% 0;}
+}
+
+@-moz-keyframes myColor /* Firefox */
+{
+    0%  { background-position: 0 0;}
+    100% { background-position: -100% 0;}
+}
+
+@-webkit-keyframes myColor /* Safari 和 Chrome */
+{
+    0%  { background-position: 0 0;}
+    100% { background-position: -100% 0;}
+}
+
+@-o-keyframes myColor /* Opera */
+{
+    0%  { background-position: 0 0;}
+    100% { background-position: -100% 0;}
+}
+
+/*css3 3D*/
