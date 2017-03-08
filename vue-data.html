@@ -3,26 +3,173 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>动态数据绑定</title>
+    <style>
+        .ipt{
+            height: 40px;
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        .box{
+            border: solid 1px #ddd;
+            padding: 10px;
+        }
+        h3{
+            margin-bottom: 10px;
+            line-height: 50px;
+        }
+    </style>
 </head>
 <body>
-
+<input class="ipt" type="text" value="app1.data.age">
+<p>(敲回车结束当前操作) 提供了俩个对象</p>
+<p>
+    var app1 = new Observer({<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;name : "xiaoming",<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;age : "24"<br/>
+    });<br/>
+    var app2 = new  Observer({<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;university : "bupt",<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;major : "computer"<br/>
+    });
+</p>
+<div class="box">
+    <h3>操作日志</h3>
+    <div class="operation"></div>
+</div>
 </body>
 <script>
+
+(function(){
+
+    var vue = {
+
+        //初始化
+        init : function(){
+
+
+            //初始化keydown事件
+            this.keyDown();
+
+        },
+
+        //节点
+        Doc : {
+            ipt : document.querySelector(".ipt"),
+
+            operation : document.querySelector(".operation")
+        },
+
+        //keydown事件
+        keyDown : function(){
+            var _this = this;
+            var value = "";
+            document.onkeydown = function( e ){
+                var ev = e || event;
+                var code = ev.keyCode;
+
+                if( code == 13 ){
+
+                    value = _this.Doc.ipt.value;
+                    _this.work( value )
+
+                }else{
+                    return;
+                }
+
+            }
+        },
+
+        //操作
+        work : function( value ){
+
+
+            var app1 = new Observer({
+                name : "xiaoming",
+                age : "24"
+            });
+
+            var app2 = new Observer({
+                university : "bupt",
+                major : "computer"
+            });
+
+            eval( value )
+        }
+
+    };
+
+    vue.init();
+
+
+})()
+
 
 //观察者构造函数
 function Observer( data ){
     this.data = data;
+    this.walk( data );
+};
+//这里的目的就是为了 对象的每一个属性都可以 拥有get和set
+Observer.prototype.walk = function( obj ){
+    var val;
+    for(var attr in obj ){
+
+        if( obj.hasOwnProperty(attr) ){
+            val = obj[attr];
+            //利用递归思想
+            if( typeof val === 'object' ){
+                new Observer( val )
+            }
+
+            this.convert( attr , val );
+
+        }
+
+    }
+
 };
 
-var app1 = new Observer({
-    name : "xiaoming",
-    age : "24"
-});
+//这里就是动态监听对象变化的方法
+Observer.prototype.convert = function( key , val){
 
-var app2 = new  Observer({
-    university : "bupt",
-    major : "computer"
-});
+    Object.defineProperty( this.data , key , {
+
+        enumerable : true ,
+        configurable : true ,
+
+        set : function( newval ){
+
+            var operation = document.querySelector(".operation");
+            var p = document.createElement("p");
+            p.style.color = "#f00";
+            p.innerHTML = '你设置了 '+key+' 新的 '+key+' = '+newval+'';
+
+            operation.appendChild( p );
+
+            if ( newval === val) return;
+            val = newval ;
+
+        },
+
+        get : function( ){
+
+            var operation = document.querySelector(".operation");
+            var p = document.createElement("p");
+            p.style.color = "#f00";
+            p.innerHTML = '你访问了 '+key+'';
+
+            operation.appendChild( p );
+
+            return val;
+        }
+
+    })
+
+};
+
+
 
 
 
