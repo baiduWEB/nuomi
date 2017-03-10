@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>动态数据绑定</title>
+    <style>
+        .ipt{
+            height: 40px;
+            width: 100%;
+            padding: 5px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        .box{
+            border: solid 1px #ddd;
+            padding: 10px;
+        }
+        h3{
+            margin-bottom: 10px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+</body>
+<script>
+
+
+    //实现一个事件
+    function Event(){
+        this.events = {};
+    };
+
+    //绑定事件
+    Event.prototype.on = function( event , callback ){
+
+        if( this.events[event] ){
+           this.events[event].push( callback );
+        }else{
+            this.events[event] = [callback];
+        }
+    };
+
+    //解绑事件
+    Event.prototype.off = function( event){
+
+        for(var attr in this.events ){
+            if( this.events.hasOwnProperty( event ) && event === attr ){
+                delete this.events[event]
+            }
+        }
+    };
+    //触发事件
+    Event.prototype.emit = function( event ){
+        var arg = Array.prototype.slice.call( arguments , 1);
+        this.events[event] && this.events[event].forEach(function(item){
+
+            item.apply( this , arg);
+        })
+    };
+
+    function Observer( obj ){
+        this.data = obj;
+        this.recursion( obj );
+        this.event = new Event();
+
+    }
+    Observer.prototype.recursion = function( obj ){
+        var val;
+        for(var key in obj ){
+
+            if( obj.hasOwnProperty(key) ){
+
+                val = obj[key];
+
+                if( typeof val === "object" ){
+                    new Observer( val );
+                }
+
+            };
+            this.convert(key , val);
+        }
+    };
+
+    Observer.prototype.convert = function( key ,val){
+        var _this = this;
+        Object.defineProperty( this.data ,key , {
+
+            configurable : true,
+            enumerable : true,
+            set : function( newKey ){
+
+                console.log( '你重新设置了'+key );
+                console.log( '新设置的值为' + newKey );
+
+                _this.event.emit( key, val, newKey)
+
+                if( typeof newKey === "object" ){
+                    console.log(9)
+                    new Observer( newKey )
+                }
+
+                if( val === newKey ){
+                    return;
+                }
+                val = newKey;
+            },
+
+            get : function(){
+                console.log( '你正在查看' + key );
+                return val;
+            }
+
+        });
+    };
+
+    Observer.prototype.$watch = function( key , fn ){
+
+        this.event.on(key , fn )
+
+    }
+
+
+
+    var app1 = new Observer({
+        name : "小明",
+        age : 23
+    });
+
+    // 你需要实现 $watch 这个 API
+    app1.$watch('age', function(oldVal, newVal){
+        console.log(`我的年龄变了，原来是: ${oldVal}岁，现在是：${newVal}岁了`)
+    });
+
+    app1.$watch('age', function(oldVal, newVal) {
+        console.log(`我的年纪变了，真的变成${newVal}岁了诶`);
+    });
+
+
+</script>
+</html>
