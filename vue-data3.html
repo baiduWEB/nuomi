@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>动态数据绑定</title>
+</head>
+<body>
+</body>
+<script>
+
+    function Event(){
+        this.events = {};
+    }
+    //绑定事件
+    Event.prototype.on = function(event , callback){
+
+        if( this.events[event] ){
+            this.events[event].push( callback );
+        }else{
+            this.events[event] = [callback];
+        }
+    };
+
+    //解绑事件
+    Event.prototype.off = function( event ){
+        for(var attr in this.events ){
+            if( this.events.hasOwnProperty(event) && event == attr ){
+                delete this.events[event]
+            }
+        }
+    };
+
+    //触发事件
+    Event.prototype.emit = function( event ){
+        var arg = Array.prototype.slice.call( arguments , 1);
+        this.events[event] && this.events[event].forEach(function( emit ){
+            emit.apply( this , arg);
+        })
+    };
+
+
+    function Observer( obj ){
+        this.data = obj;
+        this.recursion( this.data );
+        this.event = new Event();
+    }
+
+    Observer.prototype.recursion = function( obj ){
+
+        var val;
+        for(var key in obj ){
+            var val = obj[key];
+            if(obj.hasOwnProperty(key)){
+                if( typeof val === "object" ){
+                    new Observer(val);
+                };
+            };
+            this.convert( key , val);
+        }
+    };
+    Observer.prototype.convert = function( key , val ){
+        var _this = this;
+        Object.defineProperty( this.data , key , {
+
+            configurable : true,
+            enumerable : true,
+            set : function(newVal){
+                //console.log("你修改了" + key);
+                //_this.event.emit( key , val , newVal );
+
+                _this.parent( key );
+
+                if( typeof newVal === "object" ){
+                    new Observer( newVal )
+                };
+
+                if( val == newVal ){
+                    return;
+                };
+                val = newVal;
+            },
+            get : function(){
+                //console.log("你获取了" + key);
+                return val;
+            }
+        });
+    };
+
+    Observer.prototype.$watch = function( key , callback ){
+        this.event.on( key , callback );
+    };
+
+    Observer.prototype.parent = function( key ){
+        console.log( key )
+        console.log( key.parent )
+    };
+
+
+
+    var app1 = new Observer({
+        name : "小明",
+        age : 23,
+        job : {
+            worker1 : "学生",
+            worker2 : "工人"
+        }
+    });
+
+    app1.$watch('job', function ( newName ) {
+        console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。')
+    });
+
+    var a = {
+        style : {
+            height : 400,
+            width : 300,
+            css : {
+                position : "absolute",
+                top : "500"
+            }
+        }
+    };
+
+    console.log(a.indexOf( "style" ) )
+
+
+
+
+
+
+
+</script>
+</html>
