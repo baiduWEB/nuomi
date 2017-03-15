@@ -19,45 +19,9 @@
 <script>
 
 
-    function Event(){
-        this.events = {};
-    }
-    //绑定事件
-    Event.prototype.on = function(event , callback){
-
-        if( this.events[event] ){
-            this.events[event].push( callback );
-        }else{
-            this.events[event] = [callback];
-        }
-    };
-
-    //解绑事件
-    Event.prototype.off = function( event ){
-        for(var attr in this.events ){
-            if( this.events.hasOwnProperty(event) && event == attr ){
-                delete this.events[event]
-            }
-        }
-    };
-
-    //触发事件
-    Event.prototype.emit = function( event ){
-        var arg = Array.prototype.slice.call( arguments , 1);
-        this.events[event] && this.events[event].forEach(function( emit ){
-            emit.apply( this , arg);
-        })
-    };
-
-
     function Observer( obj ){
         this.el = document.querySelector( obj.el);
         this.data = obj.data;
-        this.recursion( obj.data );
-        this.event = new Event();
-
-        //此处放置父级的回调函数
-        this.callback = {};
 
         //初始化 执行
         this.init();
@@ -72,108 +36,43 @@
 
     };
 
-    //确认是那个HTML元素里面引用vue写法
+    //确认是那个HTML元素里面引用vue写法 然后输出对应的数据
     Observer.prototype.html = function( html ){
         var children = html.querySelectorAll("*");
+        var  json={};
 
+        //判断字符串里面是否有{{}}
         children.forEach(function( item , i){
 
-            var html = item.innerHTML;
+            var reg = /{{\S+}}/g;
+            var htmls = item.innerHTML;
+            var  myArray;
 
-            if(){
 
+            if( (myArray = reg.exec(htmls)) !== null ){
+                json[i] = {
+                    html : item ,
+                    arr : myArray,
+                    text :htmls.replace( myArray , "") //删除{{}}里面的内容
+                }
             }
 
-            console.log( i )
         })
-
-    }
-
-    //处理{{}} 编程{}
-    Observer.prototype.setString = function(){
-
-
-
+        this.setHtml( json )
     };
 
-    Observer.prototype.recursion = function( obj ,path){
+    //设置子级元素的HTML
+    Observer.prototype.setHtml = function( obj ){
+        console.log( obj )
+        for(var attr in obj ){
 
-        var val;
-        for(var key in obj ){
-            var val = obj[key];
-            if(obj.hasOwnProperty(key)){
+            var key = obj[attr].arr[0]; //取出标记
+            var val = /{{(.*?)}}/.exec(key)[1];	// 释放标记
 
-                this.convert( obj , key , val , path );
+            var html = "this.data." + val;
 
-            };
+            obj[attr].html.innerHTML = obj[attr].text + eval(html);
 
-        }
-    };
-
-    //循环放到这里
-    Observer.prototype.method = function(  val , path ){
-        if( !val || typeof val !== "object" ) return;
-
-        path = path + ".";
-
-        this.recursion( val , path );
-
-    };
-
-    Observer.prototype.convert = function( obj , key , val , path ){
-        var _this = this;
-
-        if( path ){
-            path = path + key;
-        }else{
-            path = key;
-        };
-
-        //此函数的作用是记录路径
-        this.method( val , path );
-
-        //这里就是数据的动态绑定
-        Object.defineProperty( obj , key , {
-
-            configurable : true,
-
-            enumerable : true,
-
-            set : function(newVal){
-
-                //此函数 通知父级数据
-                _this.noticeParent( path );
-
-                if( typeof newVal === "object" ){
-                    new Observer( newVal )
-                };
-
-                if( val == newVal ){
-                    return;
-                };
-                val = newVal;
-            },
-
-            get : function(){
-                //console.log("你获取了" + key);
-                return val;
-            }
-        });
-    };
-
-    //事件监听变化
-    Observer.prototype.$watch = function( key , callback ){
-        this.event.on( key , callback );
-    };
-
-    //执行
-    Observer.prototype.noticeParent = function( path ){
-
-        var parentCallback = this.callback;
-        var keyArr = (path.split(".")).slice(0,-1);
-
-        for(var i=0; i<keyArr.length; i++ ){
-                this.event.emit( keyArr[i] , keyArr[i] );
         }
 
     };
