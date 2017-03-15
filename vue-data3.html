@@ -3,10 +3,15 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>动态数据绑定</title>
+    <script src="js/jquery-3.1.1.min.js"></script>
+
 </head>
 <body>
+
 </body>
+
 <script>
+
 
     function Event(){
         this.events = {};
@@ -41,34 +46,61 @@
 
     function Observer( obj ){
         this.data = obj;
-        this.recursion( this.data );
+        this.recursion( obj );
         this.event = new Event();
+
+        //此处放置父级的回调函数
+        this.callback = {};
+
     }
 
-    Observer.prototype.recursion = function( obj ){
+    Observer.prototype.recursion = function( obj ,path){
 
         var val;
         for(var key in obj ){
             var val = obj[key];
             if(obj.hasOwnProperty(key)){
-                if( typeof val === "object" ){
-                    new Observer(val);
-                };
+
+                this.convert( obj , key , val , path );
+
             };
-            this.convert( key , val);
+
         }
     };
-    Observer.prototype.convert = function( key , val ){
+
+    //循环放到这里
+    Observer.prototype.method = function(  val , path ){
+        if( !val || typeof val !== "object" ) return;
+
+        path = path + ".";
+
+        this.recursion( val , path );
+
+    };
+
+    Observer.prototype.convert = function( obj , key , val , path ){
         var _this = this;
-        Object.defineProperty( this.data , key , {
+
+        if( path ){
+            path = path + key;
+        }else{
+            path = key;
+        };
+
+        //此函数的作用是记录路径
+        this.method( val , path );
+
+        //这里就是数据的动态绑定
+        Object.defineProperty( obj , key , {
 
             configurable : true,
-            enumerable : true,
-            set : function(newVal){
-                //console.log("你修改了" + key);
-                //_this.event.emit( key , val , newVal );
 
-                _this.parent( key );
+            enumerable : true,
+
+            set : function(newVal){
+
+                //此函数 通知父级数据
+                _this.noticeParent( path );
 
                 if( typeof newVal === "object" ){
                     new Observer( newVal )
@@ -79,6 +111,7 @@
                 };
                 val = newVal;
             },
+
             get : function(){
                 //console.log("你获取了" + key);
                 return val;
@@ -86,19 +119,32 @@
         });
     };
 
+    //事件监听变化
     Observer.prototype.$watch = function( key , callback ){
         this.event.on( key , callback );
     };
 
-    Observer.prototype.parent = function( key ){
-        console.log( key )
-        console.log( key.parent )
+    //执行
+    Observer.prototype.noticeParent = function( path ){
+
+        var parentCallback = this.callback;
+        var keyArr = (path.split(".")).slice(0,-1);
+
+        for(var i=0; i<keyArr.length; i++ ){
+                this.event.emit( keyArr[i] , keyArr[i] );
+        }
+
     };
 
-
-
     var app1 = new Observer({
-        name : "小明",
+        name : {
+            a : "小米",
+            b : "小红",
+            c : {
+                names1 : "小狼",
+                names2 : "小鸡"
+            }
+        },
         age : 23,
         job : {
             worker1 : "学生",
@@ -106,27 +152,20 @@
         }
     });
 
+    app1.$watch('c', function ( newName ) {
+        console.log(`我的名字的${newName}发生变化`)
+    });
+    app1.$watch('c', function ( newName ) {
+        console.log(`我的名字的${newName}又发生变化`)
+    });
     app1.$watch('job', function ( newName ) {
-        console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。')
+        console.log(`我的${newName}发生了变化`)
+    });
+    app1.$watch('name', function ( newName ) {
+        console.log(`我的${newName}发生了变化`)
     });
 
-    var a = {
-        style : {
-            height : 400,
-            width : 300,
-            css : {
-                position : "absolute",
-                top : "500"
-            }
-        }
-    };
-
-    console.log(a.indexOf( "style" ) )
-
-
-
-
-
+    app1.data.name.c.names1 = "小牛"
 
 
 </script>
