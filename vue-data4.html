@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>动态数据绑定</title>
+    <script src="js/jquery-3.1.1.min.js"></script>
+
+</head>
+<body>
+
+<div id="div">
+    <p>姓名：{{user.name}}</p>
+    <p>年龄：{{user.age}}</p>
+    <div>job：医生</div>
+</div>
+
+</body>
+
+<script>
+
+
+    function Event(){
+        this.events = {};
+    }
+    //绑定事件
+    Event.prototype.on = function(event , callback){
+
+        if( this.events[event] ){
+            this.events[event].push( callback );
+        }else{
+            this.events[event] = [callback];
+        }
+    };
+
+    //解绑事件
+    Event.prototype.off = function( event ){
+        for(var attr in this.events ){
+            if( this.events.hasOwnProperty(event) && event == attr ){
+                delete this.events[event]
+            }
+        }
+    };
+
+    //触发事件
+    Event.prototype.emit = function( event ){
+        var arg = Array.prototype.slice.call( arguments , 1);
+        this.events[event] && this.events[event].forEach(function( emit ){
+            emit.apply( this , arg);
+        })
+    };
+
+
+    function Observer( obj ){
+        this.el = document.querySelector( obj.el);
+        this.data = obj.data;
+        this.recursion( obj.data );
+        this.event = new Event();
+
+        //此处放置父级的回调函数
+        this.callback = {};
+
+        //初始化 执行
+        this.init();
+
+    };
+
+    //初始化
+    Observer.prototype.init = function(){
+
+        //初始化执行
+        this.html( this.el );
+
+    };
+
+    //确认是那个HTML元素里面引用vue写法
+    Observer.prototype.html = function( html ){
+        var children = html.querySelectorAll("*");
+
+        children.forEach(function( item , i){
+
+            var html = item.innerHTML;
+
+            if(){
+
+            }
+
+            console.log( i )
+        })
+
+    }
+
+    //处理{{}} 编程{}
+    Observer.prototype.setString = function(){
+
+
+
+    };
+
+    Observer.prototype.recursion = function( obj ,path){
+
+        var val;
+        for(var key in obj ){
+            var val = obj[key];
+            if(obj.hasOwnProperty(key)){
+
+                this.convert( obj , key , val , path );
+
+            };
+
+        }
+    };
+
+    //循环放到这里
+    Observer.prototype.method = function(  val , path ){
+        if( !val || typeof val !== "object" ) return;
+
+        path = path + ".";
+
+        this.recursion( val , path );
+
+    };
+
+    Observer.prototype.convert = function( obj , key , val , path ){
+        var _this = this;
+
+        if( path ){
+            path = path + key;
+        }else{
+            path = key;
+        };
+
+        //此函数的作用是记录路径
+        this.method( val , path );
+
+        //这里就是数据的动态绑定
+        Object.defineProperty( obj , key , {
+
+            configurable : true,
+
+            enumerable : true,
+
+            set : function(newVal){
+
+                //此函数 通知父级数据
+                _this.noticeParent( path );
+
+                if( typeof newVal === "object" ){
+                    new Observer( newVal )
+                };
+
+                if( val == newVal ){
+                    return;
+                };
+                val = newVal;
+            },
+
+            get : function(){
+                //console.log("你获取了" + key);
+                return val;
+            }
+        });
+    };
+
+    //事件监听变化
+    Observer.prototype.$watch = function( key , callback ){
+        this.event.on( key , callback );
+    };
+
+    //执行
+    Observer.prototype.noticeParent = function( path ){
+
+        var parentCallback = this.callback;
+        var keyArr = (path.split(".")).slice(0,-1);
+
+        for(var i=0; i<keyArr.length; i++ ){
+                this.event.emit( keyArr[i] , keyArr[i] );
+        }
+
+    };
+
+
+</script>
+<script>
+
+    var app = new Observer({
+        el : "#div",
+        data : {
+            user : {
+                name : "小红",
+                age : 23
+            }
+        }
+    })
+
+</script>
+</html>
