@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>动态数据绑定五</title>
+    <script src="js/jquery-3.1.1.min.js"></script>
+
+</head>
+<body>
+
+<div id="div">
+    <p>姓名：{{user.name}}</p>
+    <p>年龄：{{user.age}}</p>
+    <div>job：医生</div>
+</div>
+
+</body>
+
+<script>
+
+    function Observer( obj ){
+
+        //初始化执行
+        this.init( obj );
+
+    };
+
+    //observer 初始化
+    Observer.prototype.init = function( obj ){
+
+        //为observer 添加对象属性
+        this.setPorperty(obj);
+
+        //为数据绑定 object.defindProperty方法， 在绑定之前要选把数据全部循环一遍，确定所有数据都绑定上object.defindProperty方法
+        this.will( this.data );
+
+    };
+
+    //observer 设置属性
+    Observer.prototype.setPorperty = function( obj ){
+
+        //数据
+        this.data = obj.data;
+
+        //当前操作的DOM节点集合 - 亦或者当前绑定的节点.这里暂时全部使用ID选择器
+        this.DOM = document.querySelector( obj.el );
+
+        //这里设置一个观察者对象
+        this.bind = new Event();
+
+        //这里增加一个容器 ， 是用来存放 子父级 层级关系。 要确定子父级层级关系， 肯定在will里面确认， 因为他是有个for in 负责处理数据。
+        this.top = {};
+
+    };
+
+    //为所有的数据绑定方法
+    Observer.prototype.will = function( obj , path ){ //path 代表 数据层级的路由
+
+        var val; // 用来存储obj[key]的值； 因为后面要用到， 如果val还是一个对象的话， 需要递归来再次绑定此方法；
+        for(var key in obj){
+
+            //在这里要进行判断， 只有是他自身的属性的时候，才绑定object.defineProperty方法
+            if( obj.hasOwnProperty(key) ){
+                console.log( this )
+                val = obj[key];
+                //这里是正式绑定的方法, 因为object.defineProperty方法， 必需的两个参数是obj 和 属性，所以注意这里的传值
+                //第一个obj 传入的是对象， 第二个key属性， 第三个是val值  后面有用到
+                this.convert( obj , key , val , path)
+            }
+
+        }
+    };
+
+    //判断传过来的值  是不是对象
+    Observer.prototype.isObject = function( val , path ){
+
+        if( typeof val !== "object" ) return;
+
+        path = path + "."; // path 路由之间用 . 隔开
+        this.will( val , path );
+
+    };
+
+    //正式开始绑定方法
+    Observer.prototype.convert = function( obj , key , val , path){
+
+        var _this = this;
+        var $ = this.bind;
+
+        //这里进行路由的处理，第一个的时候path是没有的 ,所有这里 path 默认 = key.
+        if( !path ){
+            path = key;
+        }else{
+            path = path + key; //这是path存在的时候，说明路由已经到了下一级或者更深级。
+        }
+
+        //在这里进行判断以下， 如果val值还是一个对象， 就需要重新调用will方法，以确保深层次的数据也可以绑定上object.defineProperty方法。
+        //这里为了代码的合理性， 再重新开个方法
+        //要对path进行处理， 因为isObject是对数据做递归处理， 所以把path传到这里。
+        this.isObject( val , path );
+        //console.log( path.length );
+        //此处是object.defineProperty,
+        //defineProperty 需要三个参数
+        Object.defineProperty( obj , key , {
+
+            configurable : true,
+            enumerable : true,
+
+            //geter是 当进行 获取操作 的时候触发的方法
+            get : function(){
+                console.log( "您获取了"+key+"值" );
+                return val;
+            },
+
+            //setter是 当进行 设置操作 的时候触发的方法 , newVal 是新设置的值
+            set : function( newVal ){
+                console.log( path );
+                console.log("您重新设置了"+key+"值， 新设置的值为"+newVal);
+
+                //在设置的时候去触发 绑定在当前属性上面的方法
+                //如果想传值的话，给emit传值。然后那边就需要接受
+                $.emit( key , val , newVal );
+
+                //这里做个判断  修改后没有变化就return出去
+                if( newVal == val ){
+                    return;
+                };
+
+                //这里在进行一个深层次的问题， 就是如果设置的newVal 也是一对象的话， 我们也要给它绑定object.defineProperty方法
+                if( typeof newVal === "object" ) _this.will( newVal )
+                val = newVal; //这里把新设置的newval 赋值给val。否则数据会输出错误。
+                return val;
+
+            }
+
+        });
+    };
+
+    //添加一个$watch 方法， 可以使当用户在某个属性上面绑定某个方法时。
+    Observer.prototype.$watch = function( event , callback ){
+
+        //原理其实就是 给event 绑定callback事件。 当XXXX的时候触发，现在我们把触发的事件 放在了setter里面。
+        var $ = this.bind;
+
+        $.on( event , callback )
+    };
+
+
+
+
+    /*
+    * 这里是事件绑定绑定构造函数
+    *
+    * 为了给Observer添加$watch方法
+    * 利用观察者模式
+    * */
+
+    //创建一个观察者构造函数
+    function Event(){
+
+        //初始化执行
+        this.init();
+
+    };
+
+    //初始化
+    Event.prototype.init = function(){
+
+        //这里定义一个 容器
+        this.event = {};
+
+    };
+
+    //绑定
+    Event.prototype.on = function( event , callback ){
+
+        //如果容器里面已经绑定过这个事件，则继续push
+        if( this.event[ event ]){
+
+            this.event[event].push( callback );
+
+        }else{
+            this.event[event] = [callback];
+        }
+    };
+
+    //触发
+    Event.prototype.emit = function( event ){
+
+        var obj = this.event;
+        var callback;
+
+        //这里接受的值有个技巧， 因为除了event参数是固定， 其他的参数是不固定，所有这里就需要arguments把参数分开。
+        var arg = Array.prototype.slice.call( arguments , 1);
+
+        //先循环容器找到对应的事件
+        for(var key in obj ){
+
+            //利用hasOwnProperty确保是本身已有的属性
+            if( obj.hasOwnProperty(event) && event === key ){
+
+                var callback = obj[key];
+
+                //循环当前绑定事件的属性 ， 进行触发事件
+                for(var i=0; i<callback.length; i++){
+
+                    //然后这里回调的时候，也要把参数传进去。因为是数组 ， 所以要用到apply方法传参
+                    callback[i].apply( this , arg );
+                };
+                return;
+            };
+
+        }
+    };
+
+    /*var reg = /{{\S+}}/g;
+    var val = /{{(.*?)}}/.exec(key)[1];	// 释放标记*/
+</script>
+
+<script>
+
+    var app = new Observer({
+        el : "#div",
+        data : {
+            user : {
+                name : {
+                    xiaohong : true,
+                    jun : false,
+                    shuaige : true
+                },
+                age : 23
+            }
+        }
+    });
+    app.$watch( "name" , function( oldName , newName ){
+        console.log(`以前是名字是${oldName},现在的名字是${newName}`);
+    })
+    app.$watch( "name" , function( oldName , newName ){
+        console.log(`又绑定了一个以前是名字是${oldName},现在的名字是${newName}`);
+    });
+
+    json = ...;
+
+    function AAA( obj ){
+
+        for(var attr in obj ){ //比如这里循环了3次
+            str++;
+            this.for( str )
+        }
+
+    };
+
+    AAA.prototype.for = function( str ){
+
+    }
+
+
+
+</script>
+</html>
