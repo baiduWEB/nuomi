@@ -34,10 +34,22 @@
         //为数据绑定 object.defindProperty方法， 在绑定之前要选把数据全部循环一遍，确定所有数据都绑定上object.defindProperty方法
         this.will( this.data );
 
+        //初始化的时候 - 更新 渲染视图的数据集合
+        this.updateDomData();
+
+        //初始化去根据数据渲染视图
+        /*
+        *  this.DOMData : 当前操作的DOM集 包含当前操作的节点， 以及数据；
+        * */
+        this.render( this.DOMData );
+
     };
 
     //observer 设置属性
     Observer.prototype.setPorperty = function( obj ){
+
+        //当前可操作的节点
+        this.doc = document.querySelector( obj.el );
 
         //数据
         this.data = obj.data;
@@ -48,8 +60,8 @@
         //这里设置一个观察者对象
         this.bind = new Event();
 
-        //这里增加一个容器 ， 是用来存放 子父级 层级关系。 要确定子父级层级关系， 肯定在will里面确认， 因为他是有个for in 负责处理数据。
-        this.top = {};
+        //渲染视图的数据集合
+        this.DOMData = {};
 
     };
 
@@ -61,7 +73,7 @@
 
             //在这里要进行判断， 只有是他自身的属性的时候，才绑定object.defineProperty方法
             if( obj.hasOwnProperty(key) ){
-                console.log( this )
+
                 val = obj[key];
                 //这里是正式绑定的方法, 因为object.defineProperty方法， 必需的两个参数是obj 和 属性，所以注意这里的传值
                 //第一个obj 传入的是对象， 第二个key属性， 第三个是val值  后面有用到
@@ -98,7 +110,7 @@
         //这里为了代码的合理性， 再重新开个方法
         //要对path进行处理， 因为isObject是对数据做递归处理， 所以把path传到这里。
         this.isObject( val , path );
-        //console.log( path.length );
+
         //此处是object.defineProperty,
         //defineProperty 需要三个参数
         Object.defineProperty( obj , key , {
@@ -114,12 +126,37 @@
 
             //setter是 当进行 设置操作 的时候触发的方法 , newVal 是新设置的值
             set : function( newVal ){
-                console.log( path );
+
+                /*
+                * 这里访问 path 有个小技巧 。 因为Object.defineProperty() 中的setter 其实就是一个函数，
+                * 当每次执行 convert() 的时候都会执行里面的Object.defineProperty() ， 因为obj,和 key的不同，
+                * 其实在js的内存当中就会生成 类似于这样的:
+                * {
+                *     obj : aaa
+                *     key : "name"
+                *     get : ...
+                *     set : ...
+                * }
+                * {
+                 *     obj : bbb
+                 *     key : "age"
+                 *     get : ...
+                 *     set : ...
+                 * }
+                 * .....就会生成一大堆类似这样的东西， 而set这个函数，访问path的时候， 会通过作用域链，访问上层（形象的这么说）的path。
+                 * 然后在 函数内部 [ scope ]中的Closure 生成path。也就想当于在函数内部产生了一个 path变量。
+                 * 因为 path值，受key值影响 。 所以我们每次设置 属性的时候，都能正确的访问到 path.
+                *
+                * */
+
                 console.log("您重新设置了"+key+"值， 新设置的值为"+newVal);
 
                 //在设置的时候去触发 绑定在当前属性上面的方法
-                //如果想传值的话，给emit传值。然后那边就需要接受
+                //如果想传值的话，给emit传值。然后 emit 那边就需要接受一下.
                 $.emit( key , val , newVal );
+
+                //通过path 去 解析。当前key的父级绑定的事件
+                _this.analy( path , key );
 
                 //这里做个判断  修改后没有变化就return出去
                 if( newVal == val ){
@@ -128,7 +165,11 @@
 
                 //这里在进行一个深层次的问题， 就是如果设置的newVal 也是一对象的话， 我们也要给它绑定object.defineProperty方法
                 if( typeof newVal === "object" ) _this.will( newVal )
+
                 val = newVal; //这里把新设置的newval 赋值给val。否则数据会输出错误。
+
+                //当数据发生改变时，重新渲染 DOM；
+                _this.render( _this.DOMData );
                 return val;
 
             }
@@ -136,19 +177,91 @@
         });
     };
 
+    //这里会对key的 父级 进行解析
+    Observer.prototype.analy = function( path , key ){
+
+        var $ = this.bind;
+        var arr = path.split(".");
+
+        for(var i=0; i<arr.length; i++){
+            $.emit( arr[i] , arr[i+1] );
+        }
+    };
+
+    //初始化的时候 - 更新 渲染视图的数据集合 方法
+    /*数据格式
+    * this.DOMData = {
+    *   0 ： {
+    *       el : []
+    *       data
+    *   }
+    * }
+    * */
+    Observer.prototype.updateDomData = function(){
+        //this.doc;
+        //this.DOMData = {};
+        var _this = this;
+        var children = this.doc.querySelectorAll("*");
+
+        //获取拥有 {{}} 的元素 进行第一步筛选
+        children.forEach(function( item , i){
+
+            var reg = /{{\S+}}/g;
+            var htmls = item.innerHTML;
+            var  myArray;
+
+            if( (myArray = reg.exec(htmls)) !== null ){
+
+                _this.DOMData[i] = {
+                    el : item,
+                    html : htmls,
+                    ex : myArray[0],
+                    text : htmls.replace( myArray , "")
+                }
+
+            }
+        });
+
+    };
+
+    //这里 更具key值 去匹配相关的DOM， 然后去渲染视图
+    //在渲染之前要选做处理 。 去匹配可操作的DOM节点
+    Observer.prototype.render = function(){
+
+        var obj = this.DOMData; //渲染视图的数据
+        var data = this.data; //渲染视图  需要调用的数据源
+        var node; //节点
+        var key; //当前的标记;
+        var html;
+
+        for( var attr in obj ){
+            node = obj[attr].el;
+            key = obj[attr].ex;
+            key = /{{(.*?)}}/.exec(key)[1];
+            html = "this.data." + key;
+            
+            node.innerHTML = obj[attr].text + eval(html);
+        };
+
+    };
+
+    //
+
     //添加一个$watch 方法， 可以使当用户在某个属性上面绑定某个方法时。
     Observer.prototype.$watch = function( event , callback ){
 
         //原理其实就是 给event 绑定callback事件。 当XXXX的时候触发，现在我们把触发的事件 放在了setter里面。
         var $ = this.bind;
 
-        $.on( event , callback )
+        $.on( event , callback );
     };
 
 
 
 
-    /*
+
+
+    /*s dd
     * 这里是事件绑定绑定构造函数
     *
     * 为了给Observer添加$watch方法
@@ -223,36 +336,30 @@
         el : "#div",
         data : {
             user : {
-                name : {
-                    xiaohong : true,
-                    jun : false,
-                    shuaige : true
-                },
+                name : "小明",
                 age : 23
+            },
+            conpany : {
+                lenovo : {
+                    shangshi : true,
+                    money : 10000
+                },
+                bai : {
+                    shangshi : true,
+                    money : 9999999
+                },
+                foot : {
+                    shangshi : false ,
+                    money : 323
+                }
             }
         }
     });
-    app.$watch( "name" , function( oldName , newName ){
-        console.log(`以前是名字是${oldName},现在的名字是${newName}`);
-    })
-    app.$watch( "name" , function( oldName , newName ){
-        console.log(`又绑定了一个以前是名字是${oldName},现在的名字是${newName}`);
+    app.$watch( "conpany" , function( key ){
+        console.log(`你现在触发的是${key}父级对象的事件`);
     });
 
-    json = ...;
 
-    function AAA( obj ){
-
-        for(var attr in obj ){ //比如这里循环了3次
-            str++;
-            this.for( str )
-        }
-
-    };
-
-    AAA.prototype.for = function( str ){
-
-    }
 
 
 
