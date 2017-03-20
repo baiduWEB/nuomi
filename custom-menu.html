@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>自定义右键菜单</title>
+    <style>
+        *{
+            margin:0px;
+            padding:0px;
+            list-style: none;
+            border: 0;
+        }
+        body{
+            position: relative;
+            overflow: hidden;
+        }
+        a{
+            color: #666;
+            text-decoration: none;
+        }
+        .menu{
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 200px;
+            border: solid 1px #ddd;
+        }
+        li{
+            height: 40px;
+            line-height: 40px;
+            padding: 0 10px;
+        }
+        li:hover{
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="menu">
+    <ul>
+        <li><a href="javascript:void(0);">菜单一</a></li>
+        <li><a href="javascript:void(0);">菜单二</a></li>
+        <li><a href="javascript:void(0);">菜单三</a></li>
+        <li><a href="javascript:void(0);">菜单四</a></li>
+        <li><a href="javascript:void(0);">菜单五</a></li>
+        <li><a href="javascript:void(0);">菜单六</a></li>
+    </ul>
+</div>
+
+</body>
+<script>
+    (function( window ){
+
+        //创建一个页面级对象
+        var menu = {
+
+            //初始化
+            init : function(){
+                //初始化隐藏菜单
+                this.doc.menu.style.display = "none";
+
+                //添加右键事件
+                this.oncontextmenu();
+
+                //初始化点击事件
+                this.click();
+
+            },
+
+            //DOM节点
+            doc : {
+                menu : document.querySelector(".menu"),
+                li : document.querySelectorAll("li")
+            },
+
+            //页面属性
+            windowStyle : {
+
+                w : document.body.clientWidth || documetn.documentElement.clientWidth,
+                h : document.body.clientHeight || document.documentElement.clientHeight,
+                menuW : document.querySelector(".menu").clientWidth,
+                menuH : document.querySelector(".menu").clientHeight
+
+            },
+
+            //右键点击事件
+            oncontextmenu : function(){
+
+                var _this = this;
+                document.oncontextmenu = function(ev){
+
+                    var ev = ev || event;
+                    var x = ev.pageX - 4;
+                    var y = ev.pageY - 4;
+
+                    //判断 如果 右键最右边， 菜单调整位置
+                    if( x > _this.windowStyle.w - _this.windowStyle.menuW ){
+                        x = ev.pageX -  _this.windowStyle.menuW;
+                    };
+                    if( y > _this.windowStyle.h - _this.windowStyle.menuH ){
+                        y = ev.pageY -  _this.windowStyle.menuH;
+                    }
+
+                    _this.doc.menu.style.display = "block";
+                    _this.doc.menu.style.left = x + "px";
+                    _this.doc.menu.style.top = y + "px";
+
+                    return false;
+                };
+            },
+
+            //click 事件
+            click : function(){
+
+                var _this= this;
+                //点击li 弹出菜单内容
+                this.doc.li.forEach(function( emit , i){
+                    emit.onclick = function(){
+                        alert( this.innerText )
+                    }
+                });
+
+                //点击空白地图 菜单消失
+                document.onclick = function(){
+                    _this.doc.menu.style.display = "none";
+                };
+
+                this.doc.menu.onclick = function(){
+
+                    //浏览器兼容性判断 document.all 可以用来判断是不是IE
+                    if(document.all){
+                        window.event.cancelBubble = true;
+                    }else{
+                        event.stopPropagation();
+                    }
+                }
+
+            }
+
+       };
+
+        menu.init();
+
+    })(window);
+</script>
+
+
+
+</html>
