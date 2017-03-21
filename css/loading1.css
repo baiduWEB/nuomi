@@ -1,0 +1,115 @@
+.div1{
+}
+
+
+.div1 .loading , .div1 .loading1{
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -40px;
+    margin-top: -40px;
+}
+.div1 .loading{
+    border: solid 4px #FF298C;
+    border-right:4px solid transparent;
+    animation: myBorder 1s 0s linear infinite;
+}
+.div1 .loading1{
+    border: solid 4px transparent;
+}
+/*
+圆环的动画
+*/
+@keyframes myBorder{
+
+    from {
+        transform: rotateZ(0deg);
+    }
+    to {
+        transform: rotateZ(-360deg);
+    }
+ }
+/*
+圆环的动画
+*/
+.div1 .loading-radio{
+    width: 40px;
+    height: 40px;
+    background: #FF298C;
+    border-radius: 50%;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+.div1 .left , .div1 .right{
+    width: 20px;
+    height: 40px;
+    position: absolute;
+    top: 0px;
+    overflow: hidden;
+    border-radius: 50%;
+}
+.div1 .left{
+    left: 0px;
+}
+.div1 .right{
+    right: 0px;
+}
+.div1 .left .border , .div1 .right .border{
+    width: 40px;
+    width: 40px;
+    box-sizing: border-box;
+    border: solid 20px #fff;
+    opacity: 0.3;
+    border-radius: 50%;
+    position: absolute;
+}
+.div1 .left .border{
+    left: 0;
+    border-bottom: solid 20px transparent;
+    border-right: solid 20px transparent;
+    animation: myRotate1 2s 0s linear infinite;
+}
+.div1 .right .border{
+    right: 0;
+    border-top: solid 20px transparent;
+    border-left: solid 20px transparent;
+    animation: myRotate2 2s 0s linear infinite;
+}
+@keyframes myRotate1 {
+    0%{
+        transform: rotate(-45deg);
+    }
+    25%{
+        transform: rotate(-225deg);
+    }
+    50%{
+        transform: rotate(-225deg);
+    }
+    75%{
+        transform: rotate(-405deg);
+    }
+    100%{
+        transform: rotate(-405deg);
+    }
+}
+@keyframes myRotate2 {
+    0%{
+        transform: rotate(-45deg);
+    }
+    25%{
+        transform: rotate(-45deg);
+    }
+    50%{
+        transform: rotate(-225deg);
+    }
+    75%{
+        transform: rotate(-225deg);
+    }
+    100%{
+        transform: rotate(-405deg);
+    }
+}
