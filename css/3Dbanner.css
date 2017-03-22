@@ -1,0 +1,60 @@
+body{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+img{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+/*
+.box{
+    transform-style: preserve-3d;
+    width: 100%;
+    height: 100%;
+ }*/
+.depth3D{
+    width:400px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    left:50%;
+    margin-left: -200px;
+    margin-top: -150px;
+    transform-origin: center;
+    transform-style: preserve-3d;
+    perspective: 0px;
+    transform: rotateX(-4deg) rotateY(0deg) rotateZ(0deg);
+    animation: myRotate 20s 0s linear infinite;
+}
+.img{
+    position: absolute;
+}
+.img1{
+    transform: rotateY(0deg) translateZ(400px);
+}
+.img2{
+    transform: rotateY(60deg) translateZ(400px);
+}
+.img3{
+    transform: rotateY(120deg) translateZ(400px);
+}
+.img4{
+    transform: rotateY(180deg) translateZ(400px);
+}
+.img5{
+    transform: rotateY(240deg) translateZ(400px);
+}
+.img6{
+    transform: rotateY(300deg) translateZ(400px);
+}
+@keyframes myRotate{
+    from{
+        transform: rotateX(-4deg) rotateY(0deg) rotateZ(0deg);
+    }
+    to{
+        transform: rotateX(-4deg) rotateY(360deg) rotateZ(0deg);
+    }
+}
