@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+
+        }
+        div{
+            position:absolute;
+            left: 0;
+            top: 0;
+            width: 100px;
+            height: 100px;
+            background: red;
+        }
+        .div1{
+            top:100px;
+        }
+    </style>
+</head>
+<body>
+<div class="div">requrstAnimationFrame</div>
+<div class="div1">setTimeout</div>
+
+<script>
+    var div = document.querySelector(".div");
+    var div1 = document.querySelector(".div1");
+
+    document.onclick = function(){
+
+        request( );
+
+       setTime( )
+
+    }
+
+    function request( ){
+
+        div.style.left = div.offsetLeft + 2 + "px";
+
+        requestAnimationFrame(request);
+
+    };
+
+    function setTime( ){
+
+        div1.style.left = div.offsetLeft + 2 + "px";
+
+        setTimeout(setTime,160)
+
+    }
+
+</script>
+</body>
+</html>
