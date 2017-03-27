@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<script>
+
+//因为requestAnimationFrame和setTimeout一样都是全局函数可以直接调用的。
+//这段兼容的意思就是 如果浏览器兼容requestAnimationFrame，就使用requestAnimationFrame,否则就 用setTimeout来代替requestAnimationFrame。
+// timeDelta 这里时间的计算最终结果为0， 这是js setTimeout 的一个小技巧。大致意思就是 普通队列执行完成以后，才顺序执行setTimeout队列
+var requestAnimationFrame = window.requestAnimationFrame || (function() {
+    var timeLast = 0;
+
+    return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function(callback) {
+                var timeCurrent = (new Date()).getTime(),
+                        timeDelta;
+
+                /* Dynamically set delay on a per-tick basis to match 60fps. */
+                /* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671 */
+                timeDelta = Math.max(0, 16 - (timeCurrent - timeLast) );
+                timeLast = timeCurrent + timeDelta;
+
+                return setTimeout(function() { callback(timeCurrent + timeDelta); }, timeDelta);
+            };
+})();
+
+
+</script>
+</body>
+</html>

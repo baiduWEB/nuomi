@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+
+        }
+        #div3{
+            width:100px;
+            height: 100px;
+            background: red;
+            position: absolute;
+            top: 50px;
+            left: 0px;
+        }
+    </style>
+</head>
+<body>
+<button class="kg">宽高</button>
+<button class="wy">位移</button>
+<button class="tm">透明</button>
+
+<div id="div3"></div>
+<script src="../js/tween.js"></script>
+<script src="../js/velocity.js"></script>
+
+<script>
+
+    document.querySelector(".kg").onclick=function(){
+
+        style();
+
+        $("#div3").velocity({
+            height : "300",
+            width : "800"
+        },{
+            date : 1000,
+            type : "linear",
+            callback : function(){
+                console.log( "回调" )
+            }
+        });
+    };
+
+    document.querySelector(".wy").onclick=function(){
+
+        style();
+
+        $("#div3").velocity({
+            top : "300"
+        },{
+            date : 1000,
+            type : "elasticOut",
+            callback : function(){
+                console.log( "回调" )
+            }
+        });
+    };
+
+    document.querySelector(".tm").onclick=function(){
+
+        style();
+
+        $("#div3").velocity({
+            opacity : "30"
+        },{
+            date : 1000,
+            type : "linear",
+            callback : function(){
+                console.log( "回调" )
+            }
+        });
+    };
+
+    function style(){
+        document.querySelector("#div3").style.width = "100px";
+        document.querySelector("#div3").style.height = "100px";
+        document.querySelector("#div3").style.opacity = "1";
+        document.querySelector("#div3").style.left = "0px";
+        document.querySelector("#div3").style.top = "50px";
+    }
+
+
+
+
+</script>
+
+
+</body>
+</html>
