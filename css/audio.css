@@ -1,0 +1,232 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    list-style: none;
+    border:0px;
+    box-sizing: border-box;
+}
+a{
+    text-decoration: none;
+}
+.clear:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+body{
+    background: #F9F9F9;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+#audio{
+    width: 1000px;
+    height: auto;
+    margin: 100px auto 0;
+    box-shadow: 0px 0px 10px 0px #ddd;
+}
+
+
+#audio .header{
+    height: 99px;
+    background: url("../img/kugou.png") no-repeat;
+}
+#audio .content{
+    min-height: 300px;
+    height: 570px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #fff;
+    padding-top: 9px;
+    position: relative;
+    margin-top:-9px;
+}
+#audio .controller{
+    height: 70px;
+    background: #0175DA;
+}
+.controller>ul{
+    height: 100%;
+}
+
+/*mp3列表*/
+.mp3List li{
+    height: 40px;
+    line-height: 40px;
+    text-indent: 24px;
+    cursor: pointer;
+    border-top: solid 1px #F5F5F5;
+}
+.mp3List li:last-child{
+    border-bottom: solid 1px #F5F5F5;
+}
+.mp3List li a{
+    color: #333;
+    font-size: 14px;
+}
+.mp3List li:hover{
+    background: #EDF0F2;
+}
+.mp3List li.active{
+    background: #EDF0F2;
+}
+
+/*开关*/
+.switch{
+    width: 186px;
+    float: left;
+    height: 100%;
+    display: -webkit-box;
+    display: -moz-box;
+    display: box;
+}
+.switch>div{
+    -moz-box-flex: 1;
+    -webkit-box-flex: 1;
+    box-flex:1;
+    position: relative;
+}
+.lastS a , .nextS a{
+    width: 34px;
+    height: 34px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -17px;
+    margin-top: -17px;
+}
+.centerS a{
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -24px;
+    margin-top: -24px;
+    background:url("../img/kugou2.png") no-repeat;
+}
+.centerS a:hover{
+    background:url("../img/kugou1.png") no-repeat;
+}
+.centerS a.active{
+    background:url("../img/kugou7.png") no-repeat;
+}
+.lastS a{
+    background: url("../img/kugou3.png") no-repeat;
+}
+.lastS a:hover{
+    background: url("../img/kugou4.png") no-repeat;
+}
+.nextS a{
+    background: url("../img/kugou5.png") no-repeat;
+}
+.nextS a:hover{
+    background: url("../img/kugou6.png") no-repeat;
+}
+/*开关D9EBFA*/
+
+/*播放进度*/
+.speed{
+    width: 370px;
+    float: left;
+    height: 100%;
+    margin-left: 24px;
+    padding-top: 15px;
+}
+.mp3text{
+    height: 26px;
+    line-height: 26px;
+    color: #fff;
+    font-size: 12px;
+}
+.mp3text p.text{
+    width: 300px;
+    overflow: hidden;
+    float: left;
+}
+.mp3text p.time{
+    float: right;
+}
+.mp3Speed{
+    width: 100%;
+    height: 3px;
+    margin-top: 5px;
+    background: #80ACD2;
+}
+.mp3Speed .lineS{
+    height: 3px;
+    width: 0%;
+    background: #fff;
+    position: relative;
+}
+.mp3Speed .lineS .radio{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -3.5px;
+    background: #fff;
+    right: -4px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+/*播放进度*/
+
+/*功能区*/
+.fun{
+    float: left;
+    padding: 25px;
+    margin-left: 20px;
+    position: relative;
+}
+.volume{
+    width: 20px;
+    height: 20px;
+    float: left;
+    background: url("../img/kugou8.png") no-repeat;
+    cursor: pointer;
+}
+.volume:hover{
+    background: url("../img/kugou9.png") no-repeat;
+}
+/*功能区*/
+
+/*音量控制*/
+.volume_box{
+    width: 43px;
+    padding: 10px 20px;
+    height: 120px;
+    background: #000;
+    position: absolute;
+    bottom: 56px;
+    left: 13px;
+    display: none;
+}
+.volume_box:after{
+    content: "";
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url("../img/sj.png") no-repeat;
+    position: absolute;
+    bottom: -11px;
+    left: 50%;
+    margin-left: -8px;
+}
+.volume_box>div>div{
+    width: 3px;
+    height: 50px;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    background: #fff;
+}
+.volume_box>div>div .radio{
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: 0px;
+    background: #fff;
+    right: -3.5px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 3;
+}
+/*音量控制*/

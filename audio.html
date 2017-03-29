@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>钟爱的酷狗播放器</title>
+    <link rel="stylesheet" href="css/audio.css">
+</head>
+<body>
+双击播放歌曲
+<audio id="mp3" src="mp3/b.mp3" controls="controls" style="width: 0px; height: 0px; display: none;">
+    Your browser does not support the audio element.
+</audio>
+
+<div id="audio">
+
+    <header class="header"></header>
+    <section class="content">
+        <ul class="mp3List">
+
+        </ul>
+    </section>
+    <section class="controller">
+
+        <ul class="clear">
+            <li class="switch">
+                <div class="lastS"><a href="javascript:void(0);"></a></div>
+                <div class="centerS"><a class="playContruller" href="javascript:void(0);"></a></div>
+                <div class="nextS"><a href="javascript:void(0);"></a></div>
+            </li>
+
+            <li class="speed ">
+
+                <div class="mp3text">
+                    <p class="text MP3Name">周杰伦-稻花香</p>
+                    <p class="time">
+                        <span class="currentTime">0.00</span>
+                        <span>/</span>
+                        <span class="setTatalTime">0.00</span>
+                    </p>
+                </div>
+                <div class="mp3Speed">
+                    <div class="lineS"><span class="radio"></span></div>
+                </div>
+
+            </li>
+
+            <li class="fun">
+                <div class="volume_box">
+                    <div style="width: 100%; height: 100%; position: relative; background: #80ACD2;">
+                        <div class="volume_value">
+                            <span class="radio volume_radio"></span>
+                        </div>
+                    </div>
+                </div>
+                <span class="volume"></span>
+            </li>
+        </ul>
+
+    </section>
+</div>
+
+<script src="js/audio.js"></script>
+
+<script>
+
+    var audio = new Audio();
+    audio.init({
+        data : data
+    });
+
+</script>
+</body>
+</html>
